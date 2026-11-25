@@ -1,0 +1,48 @@
+<div class="shell">
+  <header class="topbar">
+    <div class="topbar__inner container">
+      <a class="brand" routerLink="/conversion" aria-label="Exchange inicio">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" opacity="0.12" />
+            <path
+              d="M7 8h7m0 0-2.5-2.5M14 8l-2.5 2.5M17 16H10m0 0 2.5 2.5M10 16l2.5-2.5"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </span>
+        <span class="brand__name">Exchange</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a
+          routerLink="/conversion"
+          routerLinkActive="nav__link--active"
+          class="nav__link"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Conversión
+        </a>
+        <a routerLink="/tipos-cambio" routerLinkActive="nav__link--active" class="nav__link">
+          Tipos de cambio
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="container">
+      <router-outlet />
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <span>Exchange</span>
+      <span class="footer__muted">Angular + .NET API</span>
+    </div>
+  </footer>
+</div>

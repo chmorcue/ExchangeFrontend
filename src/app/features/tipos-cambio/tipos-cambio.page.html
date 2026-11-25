@@ -1,0 +1,216 @@
+<section class="page-header">
+  <div>
+    <p class="page-header__eyebrow">Administración</p>
+    <h1>Tipos de cambio</h1>
+    <p>Registra, actualiza y elimina los tipos de cambio disponibles para la conversión.</p>
+  </div>
+  <button type="button" class="btn btn--ghost" (click)="loadItems()" [disabled]="loading()">
+    Actualizar
+  </button>
+</section>
+
+<div class="stack">
+  <article class="card">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">@if (isEditing()) { Editar tipo de cambio } @else { Nuevo tipo de cambio }</h2>
+        <p class="card__subtitle">
+          @if (isEditing()) {
+            Actualiza el valor del cambio para el par seleccionado.
+          } @else {
+            Define un par de monedas y su valor de cambio.
+          }
+        </p>
+      </div>
+      @if (isEditing()) {
+        <span class="pill">Editando #{{ editingId() }}</span>
+      }
+    </div>
+
+    <div class="card__body">
+      <form class="stack" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="monedaOrigen">Moneda origen</label>
+            <input
+              id="monedaOrigen"
+              type="text"
+              formControlName="monedaOrigen"
+              maxlength="3"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="USD"
+              [attr.aria-invalid]="form.controls.monedaOrigen.touched && form.controls.monedaOrigen.invalid"
+            />
+            @if (hasError('monedaOrigen', 'required')) {
+              <span class="field__error">La moneda origen es obligatoria.</span>
+            } @else if (hasError('monedaOrigen', 'pattern')) {
+              <span class="field__error">Debe tener 3 letras.</span>
+            } @else {
+              <span class="field__error"></span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="monedaDestino">Moneda destino</label>
+            <input
+              id="monedaDestino"
+              type="text"
+              formControlName="monedaDestino"
+              maxlength="3"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="PEN"
+              [attr.aria-invalid]="form.controls.monedaDestino.touched && form.controls.monedaDestino.invalid"
+            />
+            @if (hasError('monedaDestino', 'required')) {
+              <span class="field__error">La moneda destino es obligatoria.</span>
+            } @else if (hasError('monedaDestino', 'pattern')) {
+              <span class="field__error">Debe tener 3 letras.</span>
+            } @else {
+              <span class="field__error"></span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="cambio">Tipo de cambio</label>
+            <input
+              id="cambio"
+              type="number"
+              inputmode="decimal"
+              min="0.000001"
+              step="0.000001"
+              formControlName="cambio"
+              placeholder="0.00"
+              [attr.aria-invalid]="form.controls.cambio.touched && form.controls.cambio.invalid"
+            />
+            @if (hasError('cambio', 'required')) {
+              <span class="field__error">El tipo de cambio es obligatorio.</span>
+            } @else if (hasError('cambio', 'min')) {
+              <span class="field__error">Debe ser mayor a 0.</span>
+            } @else {
+              <span class="field__error"></span>
+            }
+          </div>
+        </div>
+
+        @if (formError()) {
+          <div class="alert alert--error" role="alert">
+            <div class="alert__title">{{ formError() }}</div>
+            @if (formErrorDetails().length > 0) {
+              <ul>
+                @for (detail of formErrorDetails(); track detail) {
+                  <li>{{ detail }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="alert alert--success" role="status">{{ successMessage() }}</div>
+        }
+
+        <div class="btn-row">
+          <button type="submit" class="btn btn--primary" [disabled]="saving()">
+            @if (saving()) {
+              Guardando...
+            } @else if (isEditing()) {
+              Guardar cambios
+            } @else {
+              Crear tipo de cambio
+            }
+          </button>
+          @if (isEditing()) {
+            <button type="button" class="btn btn--ghost" (click)="cancelEdit()" [disabled]="saving()">
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Tipos registrados</h2>
+        <p class="card__subtitle">Listado de pares de moneda configurados en el sistema.</p>
+      </div>
+      <span class="pill">{{ items().length }} registros</span>
+    </div>
+
+    @if (loadError()) {
+      <div class="card__body">
+        <div class="alert alert--error" role="alert">
+          <div class="alert__title">{{ loadError() }}</div>
+        </div>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Cambio</th>
+              <th>Creado</th>
+              <th>Actualizado</th>
+              <th class="actions-col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              <tr>
+                <td colspan="6" class="table-empty">Cargando tipos de cambio...</td>
+              </tr>
+            } @else if (items().length === 0) {
+              <tr>
+                <td colspan="6" class="table-empty">
+                  <strong>No hay tipos de cambio</strong>
+                  Crea el primero usando el formulario superior.
+                </td>
+              </tr>
+            } @else {
+              @for (item of items(); track item.id) {
+                <tr>
+                  <td><span class="pill">{{ item.monedaOrigen }}</span></td>
+                  <td><span class="pill">{{ item.monedaDestino }}</span></td>
+                  <td class="mono">{{ item.cambio | number: '1.2-6' }}</td>
+                  <td class="muted">{{ item.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="muted">
+                    @if (item.fechaActualiza) {
+                      {{ item.fechaActualiza | date: 'dd/MM/yyyy HH:mm' }}
+                    } @else {
+                      —
+                    }
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button
+                        type="button"
+                        class="btn btn--ghost btn--sm"
+                        (click)="startEdit(item)"
+                        [disabled]="saving() || deletingId() === item.id"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn--danger btn--sm"
+                        (click)="remove(item)"
+                        [disabled]="saving() || deletingId() === item.id"
+                      >
+                        @if (deletingId() === item.id) { Eliminando... } @else { Eliminar }
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </article>
+</div>
